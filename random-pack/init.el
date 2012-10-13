@@ -32,6 +32,15 @@
     'interactive)
 (global-set-key "\M-Z" 'zap-up-to-char)
 
+;;copy, instead of killing, a line
+(defun copy-line (arg)
+  "Copy lines (as many as prefix argument) in the kill ring"
+  (interactive "p")
+  (kill-ring-save (line-beginning-position)
+                  (line-beginning-position (+ 1 arg)))
+  (message "%d line%s copied" arg (if (= 1 arg) "" "s")))
+(global-set-key "\C-c\C-k" 'copy-line)
+
  ; Outline-minor-mode key map
  (define-prefix-command 'cm-map nil "Outline-")
  ; HIDE
@@ -54,3 +63,6 @@
 (define-key cm-map "f" 'outline-forward-same-level)        ; Forward - same level
 (define-key cm-map "b" 'outline-backward-same-level)       ; Backward - same level
 (global-set-key "\M-o" cm-map)
+
+;; have ido hop over to symbol
+(global-set-key (kbd "C-'") 'ido-goto-symbol)
