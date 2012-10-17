@@ -13,3 +13,4 @@
 
 ;;random
 (define-key region-bindings-mode-map ";" 'comment-dwim)
+(define-key region-bindings-mode-map (kbd "TAB") 'indent-region)
