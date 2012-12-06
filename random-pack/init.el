@@ -7,32 +7,32 @@
 (global-set-key (kbd "C-<tab>") 'indent-region)
 (define-key global-map "\C-xj" 'dired-jump)
 
-;;quick switching to previous buffer
+;; quick switching to previous buffer
 (defun switch-to-previous-buffer ()
       (interactive)
       (switch-to-buffer (other-buffer (current-buffer) 1)))
 (global-set-key (kbd "C-x y") 'switch-to-previous-buffer)
 
-;;delete whitespace when saving
+;; delete whitespace when saving
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
-;;correct javascript indentation
+;; correct javascript indentation
 (setq js-indent-level 2)
 
-;;make dired not create a new buffer when using ^ to navigate
+;; make dired not create a new buffer when using ^ to navigate
 (add-hook 'dired-mode-hook
           (lambda ()
           (define-key dired-mode-map (kbd "^")
             (lambda () (interactive) (find-alternate-file "..")))))
 
-;;zap-up-to-char
+;; zap-up-to-char
  (autoload 'zap-up-to-char "misc"
     "Kill up to, but not including ARGth occurrence of CHAR.
   \(fn arg char)"
     'interactive)
 (global-set-key "\M-Z" 'zap-up-to-char)
 
-;;copy, instead of killing, a line
+;; copy, instead of killing, a line
 (defun copy-line (arg)
   "Copy lines (as many as prefix argument) in the kill ring"
   (interactive "p")
@@ -76,3 +76,26 @@
       (when (and (buffer-file-name) (not (buffer-modified-p)))
         (revert-buffer t t t) )))
   (message "Refreshed open files.") )
+
+;; add C-M-backspace to kill segxp backwards
+(global-set-key (kbd "C-M-<backspace>") 'backward-kill-sexp)
+
+;; dired diff marked files
+(defun dired-ediff-marked-files ()
+  "Run ediff on marked ediff files."
+  (interactive)
+  (set 'marked-files (dired-get-marked-files))
+  (when (= (safe-length marked-files) 2)
+    (ediff-files (nth 0 marked-files) (nth 1 marked-files)))
+
+  (when (= (safe-length marked-files) 3)
+    (ediff3 (buffer-file-name (nth 0 marked-files))
+            (buffer-file-name (nth 1 marked-files))
+            (buffer-file-name (nth 2 marked-files)))))
+
+;; windmove
+(windmove-default-keybindings)         ; shifted arrow keys
+(setq windmove-wrap-around t)
+
+;; random custom commands
+(load-file (concat (live-pack-lib-dir) "/random.el"))

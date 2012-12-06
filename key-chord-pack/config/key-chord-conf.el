@@ -11,3 +11,6 @@
 
 ;;ace-jump keys
 (key-chord-define-global "jk" 'ace-jump-word-mode)
+
+;; yasnippets
+(key-chord-define-global "fj" 'yas/expand)

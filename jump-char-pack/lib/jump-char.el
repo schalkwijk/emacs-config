@@ -169,7 +169,9 @@ expression suitable for jump-char.
            jump-char-store)
   (setq jump-char-mode nil)
   (remove-hook 'isearch-update-post-hook 'jump-char-isearch-update-func)
-  (remove-hook 'isearch-mode-end-hook 'jump-char-cleanup))
+  (remove-hook 'isearch-mode-end-hook 'jump-char-cleanup)
+  (if (boundp 'qj-marker-ring)           ;if quick-jump exists
+       (quick-jump-push-marker)))
 
 (defun jump-char-isearch-update-func ()
   "update run from `isearch-update-post-hook'
