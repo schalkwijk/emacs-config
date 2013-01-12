@@ -99,3 +99,66 @@
 
 ;; random custom commands
 (load-file (concat (live-pack-lib-dir) "/random.el"))
+
+;; full screen git status
+(defadvice git-status (around git-fullscreen activate)
+  (window-configuration-to-register :git-fullscreen)
+  ad-do-it
+  (delete-other-windows))
+
+(defun git-quit-session ()
+  "Restores the previous window configuration and kills the git buffer"
+  (interactive)
+  (kill-buffer)
+  (jump-to-register :git-fullscreen))
+
+(define-key git-status-mode-map (kbd "q") 'git-quit-session)
+
+;; With this snippet, another press of C-d will kill the buffer.
+(defun comint-delchar-or-eof-or-kill-buffer (arg)
+  (interactive "p")
+  (if (null (get-buffer-process (current-buffer)))
+      (kill-buffer)
+    (comint-delchar-or-maybe-eof arg)))
+
+(add-hook 'shell-mode-hook
+          (lambda ()
+            (define-key shell-mode-map
+              (kbd "C-d") 'comint-delchar-or-eof-or-kill-buffer)))
+
+;; With these shortcuts you can open a new line above or below the current one, even if the cursor is midsentence.
+(defun open-line-below ()
+  (interactive)
+  (end-of-line)
+  (newline)
+  (indent-for-tab-command))
+
+(defun open-line-above ()
+  (interactive)
+  (beginning-of-line)
+  (newline)
+  (forward-line -1)
+  (indent-for-tab-command))
+
+(global-set-key (kbd "C-o") 'open-line-below)
+(global-set-key (kbd "C-S-o") 'open-line-above)
+
+;; For some reason, renaming the current buffer file is a multi-step process in Emacs.
+(defun rename-current-buffer-file ()
+  "Renames current buffer and file it is visiting."
+  (interactive)
+  (let ((name (buffer-name))
+        (filename (buffer-file-name)))
+    (if (not (and filename (file-exists-p filename)))
+        (error "Buffer '%s' is not visiting a file!" name)
+      (let ((new-name (read-file-name "New name: " filename)))
+        (if (get-buffer new-name)
+            (error "A buffer named '%s' already exists!" new-name)
+          (rename-file filename new-name 1)
+          (rename-buffer new-name)
+          (set-visited-file-name new-name)
+          (set-buffer-modified-p nil)
+          (message "File '%s' successfully renamed to '%s'"
+                   name (file-name-nondirectory new-name)))))))
+
+(global-set-key (kbd "C-x C-r") 'rename-current-buffer-file)
