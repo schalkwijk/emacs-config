@@ -104,6 +104,7 @@
 (define-key rspec-mode-keymap (kbd "a") 'rspec-verify-all)
 (define-key rspec-mode-keymap (kbd "t") 'rspec-toggle-spec-and-target)
 (define-key rspec-mode-keymap (kbd "s") 'rspec-verify-single)
+(define-key rspec-mode-keymap (kbd "p") 'rspec-verify-given)
 (define-key rspec-mode-keymap (kbd "d") 'rspec-toggle-example-pendingness)
 
 (defgroup rspec-mode nil
@@ -151,8 +152,7 @@
   :type 'string
   :group 'rspec-mode)
 
-
-
+(setq rspec-rake-spec-command " spec")
 
 ;;;###autoload
 (define-minor-mode rspec-mode
@@ -250,6 +250,13 @@
   "Runs the 'spec' rake task for the project of the current file."
   (interactive)
   (rspec-run (rspec-core-options)))
+
+(defun rspec-verify-given ()
+  "Runs a user-supplied rake task for the project of the current file."
+  (interactive)
+  (let ((rspec-rake-spec-command " proctor"))
+    (rspec-run (rspec-core-options)))
+  )
 
 (defun rspec-toggle-spec-and-target ()
   "Switches to the spec for the current buffer if it is a
@@ -368,7 +375,7 @@
   "Returns command line to run rspec"
   (let ((bundle-command (if (rspec-bundle-p) "bundle exec " "")))
     (concat bundle-command (if rspec-use-rake-flag
-                               (concat rspec-rake-command " spec")
+                               (concat rspec-rake-command rspec-rake-spec-command)
                              rspec-spec-command))))
 
 (defun rspec-runner-options (&optional opts)
