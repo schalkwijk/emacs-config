@@ -57,7 +57,7 @@
            (ov (hlinum-find-if
                 (lambda (e) (stringp (overlay-get e 'linum-str)))
                 (overlays-in pt pt))))
-      (when ov
+      (when (and (not (and (boundp 'multiple-cursors-mode) multiple-cursors-mode)) ov)
         (let* ((str (overlay-get ov 'before-string))
                (lstr (overlay-get ov 'linum-str))
                (nov (move-overlay ov pt pt)))

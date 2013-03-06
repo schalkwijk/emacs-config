@@ -1,5 +1,8 @@
 ;;Just some arbitrary bindings I didn't want to pollute ~/.emacs.d/init.el with
 
+;; open magit status
+(global-set-key (kbd "C-x g s") 'magit-status)
+
 ;; some global key definitions
 (global-set-key (kbd "RET") 'newline-and-indent)
 (global-set-key "\M-p" 'backward-paragraph)
@@ -43,12 +46,12 @@
 
  ; Outline-minor-mode key map
  (define-prefix-command 'cm-map nil "Outline-")
- ; HIDE
-(define-key cm-map "q" 'hide-sublevels)    ; Hide everything but the top-level headings
+
+(define-key cm-map "q" 'hide-sublevels) ; Hide everything but the top-level headings
 (define-key cm-map "t" 'hide-body)         ; Hide everything but headings (all body lines)
 (define-key cm-map "o" 'hide-other)        ; Hide other branches
 (define-key cm-map "c" 'hide-entry)        ; Hide this entry's body
- (define-key cm-map "l" 'hide-leaves)       ; Hide body lines in this entry and sub-entries
+(define-key cm-map "l" 'hide-leaves)       ; Hide body lines in this entry and sub-entries
 (define-key cm-map "d" 'hide-subtree)      ; Hide everything in this entry and sub-entries
                                         ; SHOW
 (define-key cm-map "a" 'show-all)          ; Show (expand) everything
@@ -62,10 +65,11 @@
 (define-key cm-map "p" 'outline-previous-visible-heading)  ; Previous
 (define-key cm-map "f" 'outline-forward-same-level)        ; Forward - same level
 (define-key cm-map "b" 'outline-backward-same-level)       ; Backward - same level
-(global-set-key "\M-o" cm-map)
+(global-set-key (kbd "C-M-o") cm-map)
+
 
 ;; have ido hop over to symbol
-(global-set-key (kbd "C-'") 'ido-goto-symbol)
+(global-set-key (kbd "C-'") 'live-ido-goto-symbol)
 
 ;; revert all buffers
 (defun revert-all-buffers ()
@@ -101,18 +105,32 @@
 (load-file (concat (live-pack-lib-dir) "/random.el"))
 
 ;; full screen git status
-(defadvice git-status (around git-fullscreen activate)
-  (window-configuration-to-register :git-fullscreen)
+
+;; (defadvice git-status (around git-fullscreen activate)
+;;   (window-configuration-to-register :git-fullscreen)
+;;   ad-do-it
+;;   (delete-other-windows))
+
+;; (defun git-quit-session ()
+;;   "Restores the previous window configuration and kills the git buffer"
+;;   (interactive)
+;;   (kill-buffer)
+;  (jump-to-register :git-fullscreen))
+
+;(define-key git-status-mode-map (kbd "q") 'git-quit-session)
+
+(defadvice magit-status (around magit-fullscreen activate)
+  (window-configuration-to-register :magit-fullscreen)
   ad-do-it
   (delete-other-windows))
 
-(defun git-quit-session ()
-  "Restores the previous window configuration and kills the git buffer"
+(defun magit-quit-session ()
+  "Restores the previous window configuration and kills the magit buffer"
   (interactive)
   (kill-buffer)
-  (jump-to-register :git-fullscreen))
+  (jump-to-register :magit-fullscreen))
 
-(define-key git-status-mode-map (kbd "q") 'git-quit-session)
+(define-key magit-status-mode-map (kbd "q") 'magit-quit-session)
 
 ;; With this snippet, another press of C-d will kill the buffer.
 (defun comint-delchar-or-eof-or-kill-buffer (arg)

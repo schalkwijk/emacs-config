@@ -38,4 +38,56 @@ as argument, BUFFER is the most recently selected other buffer.
          (forward-line (1- line))        ; jump to desired line
          (let ((beg (point)))
            (forward-line)
+
            (filter-buffer-substring beg (point))))))))
+
+;; create a temporarly snippet file that can be used to write YARD-docs
+(defun insert-list (list)
+  (while list
+    (insert (concat "\n" (first list)))
+    (setq list (cdr list))))
+
+(defun create-YARD-doc-snippet ()
+  (interactive)
+  (save-excursion
+    (re-search-forward "def [^(]+")
+    (if (looking-at "(\\\(.*\\\))")
+        (let ((value (match-string 0)))
+          (with-temp-buffer
+            (insert "# name: docstring\n# key: doc\n#-*- require-final-newline: nil -*-\n# --\n# $1")
+            (let ((index 1))
+              (insert-list (mapcar (lambda (param) (incf index) (concat "# @param " (format "[$%d] %s $%d" index param (incf index))))
+                                   (mapcar (lambda (arg) (nth 0 (split-string arg "="))) (split-string (replace-regexp-in-string "[()[[:blank:]]]*" "" value) ","))))
+              (incf index)
+              (insert (concat "\n# @return " (format "[$%d]" index) " $0")))
+            (write-region (point-min) (point-max) "~/.emacs.d/etc/snippets/ruby-mode/yard/doc")))))
+  (live-reload-snippets)
+  (insert "doc")
+  (yas/expand))
+
+;; occur-mode buff
+(defun get-buffers-matching-mode (mode)
+  "Returns a list of buffers where their major-mode is equal to MODE"
+  (let ((buffer-mode-matches '()))
+   (dolist (buf (buffer-list))
+     (with-current-buffer buf
+       (if (eq mode major-mode)
+           (add-to-list 'buffer-mode-matches buf))))
+   buffer-mode-matches))
+
+(defun multi-occur-in-this-mode ()
+  "Show all lines matching REGEXP in buffers with this major mode."
+  (interactive)
+  (multi-occur
+   (get-buffers-matching-mode major-mode)
+   (car (occur-read-primary-args))))
+
+;; in dired, open up all files that have been marked
+(eval-after-load "dired"
+  '(progn
+     (define-key dired-mode-map "F" 'dired-open-all-marked-files)
+     (defun dired-open-all-marked-files (&optional arg)
+       "Open each of the marked files, or the file under the point, or when prefix arg, the next N files "
+       (interactive "P")
+       (let* ((fn-list (dired-get-marked-files nil arg)))
+         (mapc 'find-file fn-list)))))

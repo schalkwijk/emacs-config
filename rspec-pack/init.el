@@ -1,6 +1,4 @@
 ;; Rspec mode
 
+(live-add-pack-lib "rspec")
 (require 'rspec-mode)
-(fmakunbound 'make-extent)
-(require 'rvm)
-(rvm-use-default)
