@@ -91,3 +91,11 @@ as argument, BUFFER is the most recently selected other buffer.
        (interactive "P")
        (let* ((fn-list (dired-get-marked-files nil arg)))
          (mapc 'find-file fn-list)))))
+
+
+;; set ruby mode for gemfiles
+(add-to-list 'auto-mode-alist '("Gemfile" . ruby-mode))
+
+;; auto-revert dired buffers
+(setq global-auto-revert-non-file-buffers t)
+(setq auto-revert-verbose nil)
