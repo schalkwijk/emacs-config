@@ -99,3 +99,18 @@ as argument, BUFFER is the most recently selected other buffer.
 ;; auto-revert dired buffers
 (setq global-auto-revert-non-file-buffers t)
 (setq auto-revert-verbose nil)
+
+;; get occur do do some more intuitive navigation
+(define-key occur-mode-map (kbd "n") 'occur-next)
+(define-key occur-mode-map (kbd "p") 'occur-prev)
+
+(defun occur-dwim ()
+  (interactive)
+  (let ((search-for (if (region-active-p)
+                        (buffer-substring (region-beginning) (region-end))
+                      (thing-at-point 'symbol))))
+    (if search-for
+        (occur search-for current-prefix-arg)
+      (message "Failed to occur. No active region, and point not near a symbol"))))
+
+(define-key global-map (kbd "M-s O") 'occur-dwim)

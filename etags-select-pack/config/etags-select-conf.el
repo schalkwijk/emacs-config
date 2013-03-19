@@ -1,7 +1,7 @@
 (defun visit-project-tags ()
   (interactive)
   (let ((tags-file (concat (simp-project-root) "/TAGS")))
-    (visit-tags-table tags-file)
+    (visit-tags-table tags-file t)
     (message (concat "Loaded " tags-file))))
 
 ;; build ctags for current project - note that this
@@ -20,5 +20,12 @@
     (build-ctags))
   (etags-select-find-tag-at-point))
 
-(global-set-key (kbd "M-.")  'etags-select-find-tag-at-point-wrapped)
-(global-set-key (kbd "\M-?") 'etags-select-find-tag)
+(defun etags-select-find-tag-wrapped ()
+  (interactive)
+  (if (file-exists-p (concat (simp-project-root) "/TAGS"))
+      (visit-project-tags)
+    (build-ctags))
+  (etags-select-find-tag))
+
+(global-set-key (kbd "M-.") 'etags-select-find-tag-at-point-wrapped)
+(global-set-key (kbd "M-?") 'etags-select-find-tag-wrapped)
