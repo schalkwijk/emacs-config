@@ -63,7 +63,7 @@ as argument, BUFFER is the most recently selected other buffer.
             (write-region (point-min) (point-max) "~/.emacs.d/etc/snippets/ruby-mode/yard/doc")))))
   (live-reload-snippets)
   (insert "doc")
-  (yas/expand))
+  (yas-expand))
 
 ;; occur-mode buff
 (defun get-buffers-matching-mode (mode)
@@ -93,12 +93,9 @@ as argument, BUFFER is the most recently selected other buffer.
          (mapc 'find-file fn-list)))))
 
 
-;; set ruby mode for gemfiles
+;; set ruby mode for gemfiles, rakefiles
 (add-to-list 'auto-mode-alist '("Gemfile" . ruby-mode))
-
-;; auto-revert dired buffers
-(setq global-auto-revert-non-file-buffers t)
-(setq auto-revert-verbose nil)
+(add-to-list 'auto-mode-alist '(".rake" . ruby-mode))
 
 ;; get occur do do some more intuitive navigation
 (define-key occur-mode-map (kbd "n") 'occur-next)
