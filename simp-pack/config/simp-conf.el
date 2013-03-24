@@ -1,12 +1,14 @@
 (simp-project-define
    '(:type ruby
      :has (Gemfile)
-     :ignore (.git* log .rvmrc .rspec TAGS doc)))
+     :ignore-directories (.git log doc)
+     :ignore-files (.rvmrc .rspec TAGS)))
 
 (simp-project-define
    '(:type emacs
      :has (init.el)
-     :ignore (.git TAGS)))
+     :ignore-directories (.git)
+     :ignore-files (TAGS)))
 
 (global-set-key (kbd "C-c f") 'simp-project-find-file)
 (global-set-key (kbd "C-c d") 'simp-project-root-dired)
