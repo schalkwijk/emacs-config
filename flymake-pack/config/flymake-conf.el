@@ -22,15 +22,3 @@
                   (if (and (not (null buffer-file-name)) (file-writable-p buffer-file-name))
                        (flymake-mode))
                        ))
-(defun flymake-error-buffer-message()
-  (interactive)
-  (when (get-char-property (point) 'flymake-overlay)
-    (let ((help (get-char-property (point) 'help-echo)))
-      (if help (message "%s" help)))))
-(defun flymake-error-buffer()
-  (interactive)
-  (if (eq major-mode 'ruby-mode)
-      (setq flymake-error-buffer-timer
-        (run-with-idle-timer .1 t 'flymake-error-buffer-message))))
-
-(add-hook 'ruby-mode-hook (lambda () (flymake-error-buffer)))
