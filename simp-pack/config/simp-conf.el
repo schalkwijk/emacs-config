@@ -10,6 +10,12 @@
      :ignore-directories (.git)
      :ignore-files (TAGS)))
 
+(simp-project-define
+   '(:type go
+     :has (src pkg bin)
+     :ignore-directories (.git)
+     :ignore-files (TAGS)))
+
 (global-set-key (kbd "C-c f") 'simp-project-find-file)
 (global-set-key (kbd "C-c d") 'simp-project-root-dired)
 (global-set-key (kbd "C-c s") 'simp-project-rgrep)
