@@ -223,7 +223,10 @@ Only works with GNU Emacs."
 found, see the `etags-select-no-select-for-one-match' variable to decide what
 to do."
   (interactive)
-  (etags-select-find (find-tag-default)))
+  (let ((tag-to-find (if (region-active-p)
+                         (buffer-substring (region-beginning) (region-end))
+             (find-tag-default))))
+    (etags-select-find tag-to-find)))
 
 ;;;###autoload
 (defun etags-select-find-tag ()
