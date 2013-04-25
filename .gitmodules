@@ -44,5 +44,5 @@
     path  = yard-mode-pack/lib/yard-mode
     url   = https://github.com/pd/yard-mode.el.git
 [submodule "phi-search"]
-    path  = phi-search-pack/lib/phi-search
-    url   = https://github.com/zk-phi/phi-search.git
+	path = phi-search-pack/lib/phi-search
+	url = https://github.com/zk-phi/phi-search.git
