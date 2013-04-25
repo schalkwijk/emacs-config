@@ -14,11 +14,12 @@
 (push '("Rakefile$" flymake-ruby-init) flymake-allowed-file-name-masks)
 
 (push '("^\\(.*\\):\\([0-9]+\\): \\(.*\\)$" 1 2 nil 3) flymake-err-line-patterns)
+;; jruby-specific error patterns for -c flag
+(push '("^SyntaxError in \\(.*\\):\\([0-9]+\\): \\(.*\\)$" 1 2 nil 3) flymake-err-line-patterns)
 
 (add-hook 'ruby-mode-hook
           '(lambda ()
-
-                  ;; Don't want flymake mode for ruby regions in rhtml files and also on read only files
-                  (if (and (not (null buffer-file-name)) (file-writable-p buffer-file-name))
-                       (flymake-mode))
-                       ))
+             ;; Don't want flymake mode for ruby regions in rhtml files and also on read only files
+             (run-with-idle-timer 2 nil 'rvm-activate-corresponding-ruby)
+             (if (and (not (null buffer-file-name)) (file-writable-p buffer-file-name))
+                 (flymake-mode))))
