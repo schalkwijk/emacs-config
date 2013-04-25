@@ -41,30 +41,6 @@ as argument, BUFFER is the most recently selected other buffer.
 
            (filter-buffer-substring beg (point))))))))
 
-;; create a temporarly snippet file that can be used to write YARD-docs
-(defun insert-list (list)
-  (while list
-    (insert (concat "\n" (first list)))
-    (setq list (cdr list))))
-
-(defun create-YARD-doc-snippet ()
-  (interactive)
-  (save-excursion
-    (re-search-forward "def [^(]+")
-    (if (looking-at "(\\\(.*\\\))")
-        (let ((value (match-string 0)))
-          (with-temp-buffer
-            (insert "# name: docstring\n# key: doc\n#-*- require-final-newline: nil -*-\n# --\n# $1")
-            (let ((index 1))
-              (insert-list (mapcar (lambda (param) (incf index) (concat "# @param " (format "[$%d] %s $%d" index param (incf index))))
-                                   (mapcar (lambda (arg) (nth 0 (split-string arg "="))) (split-string (replace-regexp-in-string "[()[[:blank:]]]*" "" value) ","))))
-              (incf index)
-              (insert (concat "\n# @return " (format "[$%d]" index) " $0")))
-            (write-region (point-min) (point-max) "~/.emacs.d/etc/snippets/ruby-mode/yard/doc")))))
-  (live-reload-snippets)
-  (insert "doc")
-  (yas-expand))
-
 ;; occur-mode buff
 (defun get-buffers-matching-mode (mode)
   "Returns a list of buffers where their major-mode is equal to MODE"
@@ -111,3 +87,148 @@ as argument, BUFFER is the most recently selected other buffer.
       (message "Failed to occur. No active region, and point not near a symbol"))))
 
 (define-key global-map (kbd "M-s O") 'occur-dwim)
+
+;; some more global key definitions
+(global-set-key (kbd "RET") 'newline-and-indent)
+(global-set-key "\M-p" 'backward-paragraph)
+(global-set-key "\M-n" 'forward-paragraph)
+(global-set-key (kbd "C-<tab>") 'indent-region)
+(define-key global-map "\C-xj" 'dired-jump)
+
+;; delete whitespace when saving
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+
+;; correct javascript indentation
+(setq js-indent-level 2)
+
+;; make dired not create a new buffer when using ^ to navigate
+(add-hook 'dired-mode-hook
+          (lambda ()
+            (define-key dired-mode-map (kbd "^")
+              (lambda () (interactive) (find-alternate-file "..")))))
+
+;; zap-up-to-char
+(autoload 'zap-up-to-char "misc"
+  "Kill up to, but not including ARGth occurrence of CHAR.
+  \(fn arg char)"
+  'interactive)
+(global-set-key "\M-Z" 'zap-up-to-char)
+
+;; copy, instead of killing, a line
+(defun copy-line (arg)
+  "Copy lines (as many as prefix argument) in the kill ring"
+  (interactive "p")
+  (kill-ring-save (line-beginning-position)
+                  (line-beginning-position (+ 1 arg)))
+  (message "%d line%s copied" arg (if (= 1 arg) "" "s")))
+(global-set-key "\C-c\C-k" 'copy-line)
+
+                                        ; Outline-minor-mode key map
+(define-prefix-command 'cm-map nil "Outline-")
+
+(define-key cm-map "q" 'hide-sublevels) ; Hide everything but the top-level headings
+(define-key cm-map "t" 'hide-body)         ; Hide everything but headings (all body lines)
+(define-key cm-map "o" 'hide-other)        ; Hide other branches
+(define-key cm-map "c" 'hide-entry)        ; Hide this entry's body
+(define-key cm-map "l" 'hide-leaves)       ; Hide body lines in this entry and sub-entries
+(define-key cm-map "d" 'hide-subtree)      ; Hide everything in this entry and sub-entries
+                                        ; SHOW
+(define-key cm-map "a" 'show-all)          ; Show (expand) everything
+(define-key cm-map "e" 'show-entry)        ; Show this heading's body
+(define-key cm-map "i" 'show-children)     ; Show this heading's immediate child sub-headings
+(define-key cm-map "k" 'show-branches)     ; Show all sub-headings under this heading
+(define-key cm-map "s" 'show-subtree)      ; Show (expand) everything in this heading & below
+                                        ; MOVE
+(define-key cm-map "u" 'outline-up-heading)                ; Up
+(define-key cm-map "n" 'outline-next-visible-heading)      ; Next
+(define-key cm-map "p" 'outline-previous-visible-heading)  ; Previous
+(define-key cm-map "f" 'outline-forward-same-level)        ; Forward - same level
+(define-key cm-map "b" 'outline-backward-same-level)       ; Backward - same level
+(global-set-key (kbd "C-M-o") cm-map)
+
+
+;; have ido hop over to symbol
+(global-set-key (kbd "C-'") 'live-ido-goto-symbol)
+
+;; revert all buffers
+(defun revert-all-buffers ()
+  "Refreshes all open buffers from their respective files."
+  (interactive)
+  (dolist (buf (buffer-list))
+    (with-current-buffer buf
+      (when (and (buffer-file-name) (not (buffer-modified-p)))
+        (revert-buffer t t t) )))
+  (message "Refreshed open files.") )
+
+;; add C-M-backspace to kill segxp backwards
+(global-set-key (kbd "C-M-<backspace>") 'backward-kill-sexp)
+
+;; dired diff marked files
+(defun dired-ediff-marked-files ()
+  "Run ediff on marked ediff files."
+  (interactive)
+  (set 'marked-files (dired-get-marked-files))
+  (when (= (safe-length marked-files) 2)
+    (ediff-files (nth 0 marked-files) (nth 1 marked-files)))
+
+  (when (= (safe-length marked-files) 3)
+    (ediff3 (buffer-file-name (nth 0 marked-files))
+            (buffer-file-name (nth 1 marked-files))
+            (buffer-file-name (nth 2 marked-files)))))
+
+;; windmove
+(windmove-default-keybindings)         ; shifted arrow keys
+(setq windmove-wrap-around t)
+
+;; With this snippet, another press of C-d will kill the buffer.
+(defun comint-delchar-or-eof-or-kill-buffer (arg)
+  (interactive "p")
+  (if (null (get-buffer-process (current-buffer)))
+      (kill-buffer)
+    (comint-delchar-or-maybe-eof arg)))
+
+(add-hook 'shell-mode-hook
+          (lambda ()
+            (define-key shell-mode-map
+              (kbd "C-d") 'comint-delchar-or-eof-or-kill-buffer)))
+
+;; With these shortcuts you can open a new line above or below the current one, even if the cursor is midsentence.
+(defun open-line-below ()
+  (interactive)
+  (end-of-line)
+  (newline)
+  (indent-for-tab-command))
+
+(defun open-line-above ()
+  (interactive)
+  (beginning-of-line)
+  (newline)
+  (forward-line -1)
+  (indent-for-tab-command))
+
+(global-set-key (kbd "C-o") 'open-line-below)
+(global-set-key (kbd "C-S-o") 'open-line-above)
+
+;; For some reason, renaming the current buffer file is a multi-step process in Emacs.
+(defun rename-current-buffer-file ()
+  "Renames current buffer and file it is visiting."
+  (interactive)
+  (let ((name (buffer-name))
+        (filename (buffer-file-name)))
+    (if (not (and filename (file-exists-p filename)))
+        (error "Buffer '%s' is not visiting a file!" name)
+      (let ((new-name (read-file-name "New name: " filename)))
+        (if (get-buffer new-name)
+            (error "A buffer named '%s' already exists!" new-name)
+          (rename-file filename new-name 1)
+          (rename-buffer new-name)
+          (set-visited-file-name new-name)
+          (set-buffer-modified-p nil)
+          (message "File '%s' successfully renamed to '%s'"
+                   name (file-name-nondirectory new-name)))))))
+
+(global-set-key (kbd "C-x C-r") 'rename-current-buffer-file)
+
+(global-set-key (kbd "C-x r o") 'bookmark-jump-other-window)
+
+(global-set-key (kbd "C-x M-b") 'ido-switch-buffer-other-window)

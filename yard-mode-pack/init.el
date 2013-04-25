@@ -4,3 +4,4 @@
 (live-add-pack-lib "yard-mode")
 (require 'yard-mode)
 (add-hook 'ruby-mode-hook 'yard-mode)
+(live-load-config-file "yard-conf.el")
