@@ -2,13 +2,13 @@
    '(:type ruby
      :has (Gemfile)
      :ignore-directories (.git log doc)
-     :ignore-files (.rvmrc .rspec TAGS)))
+     :ignore-files (.rvmrc .rspec TAGS *.war)))
 
 (simp-project-define
    '(:type emacs
      :has (init.el)
      :ignore-directories (.git)
-     :ignore-files (TAGS)))
+     :ignore-files (TAGS *.elc)))
 
 (simp-project-define
    '(:type go
@@ -16,12 +16,14 @@
      :ignore-directories (.git)
      :ignore-files (TAGS)))
 
-(global-set-key (kbd "C-c f") 'simp-project-find-file)
-(global-set-key (kbd "C-c d") 'simp-project-root-dired)
-(global-set-key (kbd "C-c s") 'simp-project-rgrep)
-(global-set-key (kbd "C-c S") 'simp-project-rgrep-dwim)
-(global-set-key (kbd "C-c b") 'simp-project-ibuffer-files-only)
-(global-set-key (kbd "C-c B") 'simp-project-ibuffer)
+(global-set-key (kbd "C-c f")   'simp-project-find-file)
+(global-set-key (kbd "C-c C-f") 'simp-project-find-file-other-window)
+(global-set-key (kbd "C-c d")   'simp-project-root-dired)
+(global-set-key (kbd "C-c s")   'simp-project-rgrep)
+(global-set-key (kbd "C-c S")   'simp-project-rgrep-dwim)
+(global-set-key (kbd "C-c b")   'simp-project-ibuffer-files-only)
+(global-set-key (kbd "C-c B")   'simp-project-ibuffer)
+(global-set-key (kbd "C-c r")   'simp-project-query-replace)
 
 ;; The functions below no longer seem to work
 ;;(global-set-key (kbd "C-c C-f") 'simp-project-with-bookmark-find-file)
